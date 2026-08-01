@@ -1,15 +1,19 @@
 import React, { useState, createContext } from 'react';
 
 //create context
-export const expenseContext = createContext({
+export const ExpenseContext = createContext({
     expenseList: [],
-    setExpenseList: () => {},
+    addExpense: () => { },
+    handleExpenseEdit: () => { },
+    deleteExpense: () => { },
+    editValue: null,
 });
 
 //provider context
-const ExpenseContext = ({ children }) => {
+const ExpenseContextProvider = ({ children }) => {
     const initialState = [
         {
+            id: 1,
             title: "Pizza",
             category: "Food",
             description: "Dinner",
@@ -19,15 +23,71 @@ const ExpenseContext = ({ children }) => {
         }
     ]
     const [expenseList, setExpenseList] = useState(initialState);
+    const [editValue, setEditValue] = useState(null);
+
+
+    const addExpense = (input) => {
+        if (!input) {
+            alert("fill all the detail");
+        } else if (editValue) {
+            setExpenseList((prev) =>
+                prev.map((d) =>
+                    d.id === editValue.id
+                        ? {
+                            ...d,
+                            title: input.title,
+                            description: input.description,
+                            category: input.category,
+                            amount: input.amount,
+                            date: input.date,
+                            type: input.type,
+                        }
+                        : d,
+                ),
+            );
+
+            setEditValue(null);
+        } else {
+            const newExpense = {
+                id: new Date().getTime(),
+                title: input.title,
+                description: input.description,
+                category: input.category,
+                amount: input.amount,
+                date: input.date,
+                type: input.type,
+            };
+
+            setExpenseList((prev) => [...prev, newExpense]);
+        }
+    };
+    const deleteExpense = (id) => {
+        const remainExpenseList = expenseList.filter(
+            (expense) => expense.id !== id,
+        );
+
+        setExpenseList(remainExpenseList);
+
+        alert("expense deleted successfully");
+    };
+
+    const handleExpenseEdit = (id) => {
+        const editExpense = expenseList.find((expense) => expense.id === id);
+
+        setEditValue(editExpense);
+    };
     const values = {
         expenseList,
-        setExpenseList,
+        addExpense,
+        handleExpenseEdit,
+        deleteExpense,
+        editValue,
     }
     return (
         <>
-            <expenseContext.Provider value={values}>{children}</expenseContext.Provider>
+            <ExpenseContext.Provider value={values}>{children}</ExpenseContext.Provider>
         </>
     )
 }
 
-export default ExpenseContext
+export default ExpenseContextProvider

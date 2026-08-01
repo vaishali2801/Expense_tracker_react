@@ -1,16 +1,23 @@
-import { useContext, useState } from "react";
-import { expenseContext } from "../context/ExpenseContext";
+import { useContext, useState,useEffect } from "react";
+import { ExpenseContext } from "../context/ExpenseContext";
 
 const AddExpense = () => {
-    const { setExpenseList } = useContext(expenseContext);
+    const { addExpense, editValue } = useContext(ExpenseContext);
+
     const [input, setInput] = useState({
         title: "",
         category: "",
-        description: "",
+        description: "",    
         amount: 0,
         type: "",
         date: "",
     });
+    
+
+    useEffect(() => {
+        editValue ? setInput(editValue) : null;
+    }, [editValue]);
+
 
     const handleChange = (field, e) => {
         setInput((prev) => {
@@ -21,41 +28,41 @@ const AddExpense = () => {
         })
     }
     const handleSubmit = (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    setExpenseList((prev) => [...prev, input]);
+        addExpense(input);
 
-    setInput({
-        title: "",
-        category: "",
-        description: "",
-        amount: 0,
-        type: "",
-        date: "",
-    });
-    console.log("data",input);
-};
+        setInput({
+            title: "",
+            category: "",
+            description: "",
+            amount: 0,
+            type: "",
+            date: "",
+        });
+        console.log("data", input);
+    };
 
     return (
         <>
             <form action="" onSubmit={handleSubmit}>
                 <label htmlFor="title" >Title:</label>
-                <input type="text" placeholder='enter title' value={input.title} onChange={(e) => handleChange("title", e)} />
+                <input type="text" placeholder='enter title' value={input.title} onChange={(e) => handleChange("title", e)} required/>
                 <br />
                 <br />
                 <label htmlFor="description" >Description:</label>
-                <input type="text" placeholder='enter description' value={input.description} onChange={(e) => handleChange("description", e)} />
+                <input type="text" placeholder='enter description' value={input.description} onChange={(e) => handleChange("description", e)} required/>
                 <br />
                 <br />
                 <label htmlFor="amount" >Amount:</label>
-                <input type="number" value={input.amount} onChange={(e) => handleChange("amount", e)} />
+                <input type="number" value={input.amount} onChange={(e) => handleChange("amount", e)} required/>
                 <br />
                 <br />
                 <label htmlFor="date" >Date:</label>
-                <input type="date" value={input.date} onChange={(e) => handleChange("date", e)} />
+                <input type="date" value={input.date} onChange={(e) => handleChange("date", e)} required/>
                 <br />
                 <br />
-                <select name="" id="" onChange={(e) => handleChange("category", e)}>
+                <select name="" id="" onChange={(e) => handleChange("category", e)} required>
                     <option value="food">Food</option>
                     <option value="general">general</option>
                     <option value="travel">travel</option>
@@ -64,11 +71,11 @@ const AddExpense = () => {
                     <option value="other">other</option>
 
                 </select>
-                <select name="" id="" onChange={(e) => handleChange("type", e)}>
+                <select name="" id="" onChange={(e) => handleChange("type", e)} required>
                     <option value="debit">Debit</option>
                     <option value="credit">Credit</option>
                 </select>
-                <button type='submit'>Add</button>
+                <button type='submit'>{editValue ? "update" : "Add"}</button>
             </form>
         </>
     )
