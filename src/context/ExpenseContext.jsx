@@ -1,4 +1,4 @@
-import React, { useState, createContext } from 'react';
+import React, { useState, createContext, useEffect } from 'react';
 
 //create context
 export const ExpenseContext = createContext({
@@ -7,6 +7,9 @@ export const ExpenseContext = createContext({
     handleExpenseEdit: () => { },
     deleteExpense: () => { },
     editValue: null,
+    balance:0,
+    credit: 0,
+    debit: 0,
 });
 
 //provider context
@@ -22,7 +25,18 @@ const ExpenseContextProvider = ({ children }) => {
             date: "2026-07-28"
         }
     ]
-    const [expenseList, setExpenseList] = useState(initialState);
+    //store data in local storage (5MB)
+    const [expenseList, setExpenseList] = useState(()=>{
+
+        const saved =  localStorage.getItem("expense");
+
+        return saved ? JSON.parse(saved) :initialState
+
+    });
+
+    useEffect(()=>{
+        localStorage.setItem("expense",JSON.stringify(expenseList))
+    },[expenseList])
     const [editValue, setEditValue] = useState(null);
 
 
@@ -61,6 +75,8 @@ const ExpenseContextProvider = ({ children }) => {
             setExpenseList((prev) => [...prev, newExpense]);
         }
     };
+
+    //delete
     const deleteExpense = (id) => {
         const remainExpenseList = expenseList.filter(
             (expense) => expense.id !== id,
@@ -71,17 +87,35 @@ const ExpenseContextProvider = ({ children }) => {
         alert("expense deleted successfully");
     };
 
+    //edit
     const handleExpenseEdit = (id) => {
         const editExpense = expenseList.find((expense) => expense.id === id);
 
         setEditValue(editExpense);
     };
+
+    //credit
+    const credit = expenseList.filter((expense) => expense.type === "credit").reduce((acc, curr) => {
+        return (acc += Number(curr.amount));
+    }, 0)
+
+    //debit
+    const debit = expenseList.filter((expense) => expense.type === "debit").reduce((acc, curr) => {
+        return (acc += Number(curr.amount));
+    }, 0)
+
+    //balance
+    const balance = credit - debit;
+
     const values = {
         expenseList,
         addExpense,
         handleExpenseEdit,
         deleteExpense,
         editValue,
+        balance,
+        credit,
+        debit
     }
     return (
         <>
